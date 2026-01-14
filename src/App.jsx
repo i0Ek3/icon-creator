@@ -27,6 +27,8 @@ export default function IconCreator() {
       preview: '预览',
       downloadPNG: '下载 PNG',
       downloadJPG: '下载 JPG',
+      downloadICO: '下载 ICO',
+      downloadICNS: '下载 ICNS',
       downloadPack: '下载图标包',
       packSizes: '(16, 48, 128px)',
       content: '图标内容',
@@ -56,6 +58,8 @@ export default function IconCreator() {
       preview: 'Preview',
       downloadPNG: 'Download PNG',
       downloadJPG: 'Download JPG',
+      downloadICO: 'Download ICO',
+      downloadICNS: 'Download ICNS',
       downloadPack: 'Download Pack',
       packSizes: '(16, 48, 128px)',
       content: 'Icon Content',
@@ -212,6 +216,134 @@ export default function IconCreator() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     }, `image/${format}`);
+  };
+
+  const generateICO = async (blobs) => {
+    const header = new ArrayBuffer(6);
+    const view = new DataView(header);
+    view.setUint16(0, 0, true); // Reserved
+    view.setUint16(2, 1, true); // Type: 1 = ICO
+    view.setUint16(4, blobs.length, true); // Number of images
+
+    let offset = 6 + (blobs.length * 16);
+    const entries = [];
+    const data = [];
+
+    for (const blob of blobs) {
+      const buffer = await blob.arrayBuffer();
+      const img = await createImageBitmap(blob);
+      const width = img.width >= 256 ? 0 : img.width;
+      const height = img.height >= 256 ? 0 : img.height;
+
+      const entry = new ArrayBuffer(16);
+      const entryView = new DataView(entry);
+      entryView.setUint8(0, width);
+      entryView.setUint8(1, height);
+      entryView.setUint8(2, 0); // Colors
+      entryView.setUint8(3, 0); // Reserved
+      entryView.setUint16(4, 1, true); // Planes
+      entryView.setUint16(6, 32, true); // Bits per pixel
+      entryView.setUint32(8, buffer.byteLength, true); // Size
+      entryView.setUint32(12, offset, true); // Offset
+
+      entries.push(new Uint8Array(entry));
+      data.push(new Uint8Array(buffer));
+      offset += buffer.byteLength;
+    }
+
+    const combined = new Uint8Array(offset);
+    combined.set(new Uint8Array(header), 0);
+    let currentPos = 6;
+    for (const entry of entries) {
+      combined.set(entry, currentPos);
+      currentPos += 16;
+    }
+    for (const d of data) {
+      combined.set(d, currentPos);
+      currentPos += d.length;
+    }
+
+    return new Blob([combined], { type: 'image/x-icon' });
+  };
+
+  const generateICNS = async (blobs) => {
+    const types = {
+      16: 'icp4',
+      32: 'icp5',
+      64: 'icp6',
+      128: 'ic07',
+      256: 'ic08',
+      512: 'ic09',
+      1024: 'ic10'
+    };
+
+    let totalLength = 8;
+    const blocks = [];
+
+    for (const blob of blobs) {
+      const img = await createImageBitmap(blob);
+      const type = types[img.width];
+      if (!type) continue;
+
+      const buffer = await blob.arrayBuffer();
+      const length = 8 + buffer.byteLength;
+      
+      const blockHeader = new ArrayBuffer(8);
+      const headerView = new DataView(blockHeader);
+      for (let i = 0; i < 4; i++) {
+        headerView.setUint8(i, type.charCodeAt(i));
+      }
+      headerView.setUint32(4, length, false); // Big-endian
+
+      blocks.push(new Uint8Array(blockHeader));
+      blocks.push(new Uint8Array(buffer));
+      totalLength += length;
+    }
+
+    const combined = new Uint8Array(totalLength);
+    // Header
+    const mainHeader = new DataView(combined.buffer);
+    mainHeader.setUint8(0, 'i'.charCodeAt(0));
+    mainHeader.setUint8(1, 'c'.charCodeAt(0));
+    mainHeader.setUint8(2, 'n'.charCodeAt(0));
+    mainHeader.setUint8(3, 's'.charCodeAt(0));
+    mainHeader.setUint32(4, totalLength, false);
+
+    let currentPos = 8;
+    for (const block of blocks) {
+      combined.set(block, currentPos);
+      currentPos += block.length;
+    }
+
+    return new Blob([combined], { type: 'image/x-icns' });
+  };
+
+  const downloadICO = async () => {
+    const sizes = [16, 32, 48, 64, 128, 256];
+    const blobs = await Promise.all(sizes.map(size => generateIconAtSize(size)));
+    const icoBlob = await generateICO(blobs);
+    const url = URL.createObjectURL(icoBlob);
+    const link = document.createElement('a');
+    link.download = `icon-${Date.now()}.ico`;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadICNS = async () => {
+    const sizes = [16, 32, 64, 128, 256, 512, 1024];
+    const blobs = await Promise.all(sizes.map(size => generateIconAtSize(size)));
+    const icnsBlob = await generateICNS(blobs);
+    const url = URL.createObjectURL(icnsBlob);
+    const link = document.createElement('a');
+    link.download = `icon-${Date.now()}.icns`;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const generateIconAtSize = (size) => {
@@ -375,8 +507,24 @@ export default function IconCreator() {
                 <span className="sm:hidden">JPG</span>
               </button>
               <button
+                onClick={downloadICO}
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg font-medium transition text-white shadow-md"
+              >
+                <Download size={18} />
+                <span className="hidden sm:inline">{t.downloadICO}</span>
+                <span className="sm:hidden">ICO</span>
+              </button>
+              <button
+                onClick={downloadICNS}
+                className="flex items-center justify-center gap-2 bg-pink-600 hover:bg-pink-700 px-4 py-3 rounded-lg font-medium transition text-white shadow-md"
+              >
+                <Download size={18} />
+                <span className="hidden sm:inline">{t.downloadICNS}</span>
+                <span className="sm:hidden">ICNS</span>
+              </button>
+              <button
                 onClick={downloadIconPack}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-4 py-3 rounded-lg font-medium transition text-white shadow-md"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-4 py-3 rounded-lg font-medium transition text-white shadow-md col-span-3 lg:col-span-1"
                 title={t.packSizes}
               >
                 <Package size={18} />
