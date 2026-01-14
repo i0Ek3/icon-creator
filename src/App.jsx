@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, Square, Circle, Sparkles, RefreshCw, Package, Globe } from 'lucide-react';
+import { Download, Square, Circle, Sparkles, RefreshCw, Package, Globe, Github } from 'lucide-react';
 
 export default function IconCreator() {
   const canvasRef = useRef(null);
@@ -117,7 +117,7 @@ export default function IconCreator() {
         const img = new Image();
         img.onload = () => {
           setBgImage(img);
-          setConfig({...config, bgType: 'image'});
+          setConfig({ ...config, bgType: 'image' });
         };
         img.src = event.target.result;
       };
@@ -128,10 +128,10 @@ export default function IconCreator() {
   const drawIcon = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     const size = config.size;
-    
+
     canvas.width = size;
     canvas.height = size;
 
@@ -194,17 +194,17 @@ export default function IconCreator() {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = config.textColor;
     ctx.font = `bold ${config.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-    
+
     ctx.shadowBlur = config.shadowBlur;
     ctx.shadowColor = config.shadowColor;
-    
+
     ctx.fillText(config.text, size / 2, size / 2);
   };
 
   const downloadIcon = (format = 'png') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
@@ -287,7 +287,7 @@ export default function IconCreator() {
 
       const buffer = await blob.arrayBuffer();
       const length = 8 + buffer.byteLength;
-      
+
       const blockHeader = new ArrayBuffer(8);
       const headerView = new DataView(blockHeader);
       for (let i = 0; i < 4; i++) {
@@ -350,7 +350,7 @@ export default function IconCreator() {
     return new Promise((resolve) => {
       const tempCanvas = document.createElement('canvas');
       const ctx = tempCanvas.getContext('2d');
-      
+
       tempCanvas.width = size;
       tempCanvas.height = size;
 
@@ -408,11 +408,11 @@ export default function IconCreator() {
       ctx.textBaseline = 'middle';
       ctx.fillStyle = config.textColor;
       ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-      
+
       const shadowBlur = (size / config.size) * config.shadowBlur;
       ctx.shadowBlur = shadowBlur;
       ctx.shadowColor = config.shadowColor;
-      
+
       ctx.fillText(config.text, size / 2, size / 2);
 
       tempCanvas.toBlob((blob) => {
@@ -424,14 +424,14 @@ export default function IconCreator() {
   const downloadIconPack = async () => {
     const sizes = [16, 48, 128];
     const JSZip = window.JSZip;
-    
+
     if (!JSZip) {
       alert('Loading compression library, please try again...');
       return;
     }
 
     const zip = new JSZip();
-    
+
     for (const size of sizes) {
       const blob = await generateIconAtSize(size);
       zip.file(`icon${size}.png`, blob);
@@ -468,13 +468,24 @@ export default function IconCreator() {
             </h1>
             <p className="text-gray-600">{t.subtitle}</p>
           </div>
-          <button
-            onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200 transition text-gray-700"
-          >
-            <Globe size={20} />
-            {lang === 'zh' ? 'EN' : '中文'}
-          </button>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/i0Ek3/icon-creator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200 transition text-gray-700 font-medium"
+            >
+              <Github size={20} />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+            <button
+              onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+              className="flex items-center gap-2 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200 transition text-gray-700"
+            >
+              <Globe size={20} />
+              {lang === 'zh' ? 'EN' : '中文'}
+            </button>
+          </div>
         </header>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -488,7 +499,7 @@ export default function IconCreator() {
                 style={{ width: '400px', height: '400px' }}
               />
             </div>
-            
+
             <div className="mt-6 grid grid-cols-3 gap-3">
               <button
                 onClick={() => downloadIcon('png')}
@@ -545,12 +556,12 @@ export default function IconCreator() {
                   <input
                     type="text"
                     value={config.text}
-                    onChange={(e) => setConfig({...config, text: e.target.value.slice(0, 3)})}
+                    onChange={(e) => setConfig({ ...config, text: e.target.value.slice(0, 3) })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-2xl text-center font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     maxLength={3}
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm mb-2 text-gray-700">{t.textSize}: {config.fontSize}px</label>
                   <input
@@ -558,7 +569,7 @@ export default function IconCreator() {
                     min="100"
                     max="400"
                     value={config.fontSize}
-                    onChange={(e) => setConfig({...config, fontSize: parseInt(e.target.value)})}
+                    onChange={(e) => setConfig({ ...config, fontSize: parseInt(e.target.value) })}
                     className="w-full accent-purple-600"
                   />
                 </div>
@@ -569,13 +580,13 @@ export default function IconCreator() {
                     <input
                       type="color"
                       value={config.textColor}
-                      onChange={(e) => setConfig({...config, textColor: e.target.value})}
+                      onChange={(e) => setConfig({ ...config, textColor: e.target.value })}
                       className="w-16 h-12 rounded cursor-pointer border border-gray-200"
                     />
                     <input
                       type="text"
                       value={config.textColor}
-                      onChange={(e) => setConfig({...config, textColor: e.target.value})}
+                      onChange={(e) => setConfig({ ...config, textColor: e.target.value })}
                       className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
@@ -595,32 +606,29 @@ export default function IconCreator() {
                   {t.randomColors}
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm mb-2 text-gray-700">{t.bgType}</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={() => setConfig({...config, bgType: 'gradient'})}
-                      className={`px-4 py-2 rounded-lg transition ${
-                        config.bgType === 'gradient' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
+                      onClick={() => setConfig({ ...config, bgType: 'gradient' })}
+                      className={`px-4 py-2 rounded-lg transition ${config.bgType === 'gradient' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
                     >
                       {t.gradient}
                     </button>
                     <button
-                      onClick={() => setConfig({...config, bgType: 'solid'})}
-                      className={`px-4 py-2 rounded-lg transition ${
-                        config.bgType === 'solid' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
+                      onClick={() => setConfig({ ...config, bgType: 'solid' })}
+                      className={`px-4 py-2 rounded-lg transition ${config.bgType === 'solid' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
                     >
                       {t.solid}
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className={`px-4 py-2 rounded-lg transition ${
-                        config.bgType === 'image' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
+                      className={`px-4 py-2 rounded-lg transition ${config.bgType === 'image' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
                     >
                       {t.image}
                     </button>
@@ -642,7 +650,7 @@ export default function IconCreator() {
                         <input
                           type="color"
                           value={config.bgColor1}
-                          onChange={(e) => setConfig({...config, bgColor1: e.target.value})}
+                          onChange={(e) => setConfig({ ...config, bgColor1: e.target.value })}
                           className="w-full h-12 rounded cursor-pointer border border-gray-200"
                         />
                       </div>
@@ -652,7 +660,7 @@ export default function IconCreator() {
                           <input
                             type="color"
                             value={config.bgColor2}
-                            onChange={(e) => setConfig({...config, bgColor2: e.target.value})}
+                            onChange={(e) => setConfig({ ...config, bgColor2: e.target.value })}
                             className="w-full h-12 rounded cursor-pointer border border-gray-200"
                           />
                         </div>
@@ -696,10 +704,9 @@ export default function IconCreator() {
                 ].map(({ value, label, icon: Icon }) => (
                   <button
                     key={value}
-                    onClick={() => setConfig({...config, shape: value})}
-                    className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg transition ${
-                      config.shape === value ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    }`}
+                    onClick={() => setConfig({ ...config, shape: value })}
+                    className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg transition ${config.shape === value ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
                   >
                     <Icon size={24} />
                     <span className="text-sm">{label}</span>
@@ -715,10 +722,9 @@ export default function IconCreator() {
                 {[256, 512, 1024, 2048].map(size => (
                   <button
                     key={size}
-                    onClick={() => setConfig({...config, size})}
-                    className={`px-4 py-2 rounded-lg transition ${
-                      config.size === size ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    }`}
+                    onClick={() => setConfig({ ...config, size })}
+                    className={`px-4 py-2 rounded-lg transition ${config.size === size ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
                   >
                     {size}px
                   </button>
