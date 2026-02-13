@@ -7,7 +7,7 @@ export default function IconCreator() {
   const [lang, setLang] = useState('zh');
   const [bgImage, setBgImage] = useState(null);
   const [config, setConfig] = useState({
-    size: 512,
+    size: 128,
     bgType: 'gradient',
     bgColor1: '#667eea',
     bgColor2: '#764ba2',
@@ -15,15 +15,19 @@ export default function IconCreator() {
     iconType: 'text',
     text: 'A',
     textColor: '#ffffff',
-    fontSize: 280,
+    fontSize: 70,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     fontWeight: 'bold',
     fontStyle: 'normal',
     subtitle: '',
     subtitleColor: '#ffffff',
-    subtitleSize: 80,
-    shadowBlur: 20,
+    subtitleSize: 20,
+    subtitleFontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    subtitleFontWeight: 'normal',
+    subtitleFontStyle: 'normal',
+    shadowBlur: 5,
     shadowColor: 'rgba(0,0,0,0.3)',
+    fileName: 'icon',
   });
 
   const translations = {
@@ -47,6 +51,10 @@ export default function IconCreator() {
       subtitle: '副标题',
       subtitleSize: '副标题大小',
       subtitleColor: '副标题颜色',
+      subtitleFontFamily: '副标题字体',
+      subtitleFontWeight: '副标题字体粗细',
+      subtitleFontStyle: '副标题字体样式',
+      fileName: '文件名',
       background: '背景',
       randomColors: '随机配色',
       bgType: '类型',
@@ -84,6 +92,10 @@ export default function IconCreator() {
       subtitle: 'Subtitle',
       subtitleSize: 'Subtitle Size',
       subtitleColor: 'Subtitle Color',
+      subtitleFontFamily: 'Subtitle Font Family',
+      subtitleFontWeight: 'Subtitle Font Weight',
+      subtitleFontStyle: 'Subtitle Font Style',
+      fileName: 'File Name',
       background: 'Background',
       randomColors: 'Random Colors',
       bgType: 'Type',
@@ -226,7 +238,7 @@ export default function IconCreator() {
 
     // Draw subtitle if exists
     if (config.subtitle) {
-      ctx.font = `${config.fontStyle} ${config.fontWeight} ${config.subtitleSize}px ${config.fontFamily}`;
+      ctx.font = `${config.subtitleFontStyle} ${config.subtitleFontWeight} ${config.subtitleSize}px ${config.subtitleFontFamily}`;
       ctx.fillStyle = config.subtitleColor;
       ctx.fillText(config.subtitle, size / 2, mainTextY + config.fontSize / 2 + config.subtitleSize / 2);
     }
@@ -240,7 +252,8 @@ export default function IconCreator() {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.download = `icon-${Date.now()}.${format}`;
+      const sanitizedName = config.fileName.replace(/[^a-zA-Z0-9-_]/g, '_');
+      link.download = `${sanitizedName}.${format}`;
       link.href = url;
       document.body.appendChild(link);
       link.click();
@@ -355,7 +368,8 @@ export default function IconCreator() {
     const icoBlob = await generateICO(blobs);
     const url = URL.createObjectURL(icoBlob);
     const link = document.createElement('a');
-    link.download = `icon-${Date.now()}.ico`;
+    const sanitizedName = config.fileName.replace(/[^a-zA-Z0-9-_]/g, '_');
+    link.download = `${sanitizedName}.ico`;
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -369,7 +383,8 @@ export default function IconCreator() {
     const icnsBlob = await generateICNS(blobs);
     const url = URL.createObjectURL(icnsBlob);
     const link = document.createElement('a');
-    link.download = `icon-${Date.now()}.icns`;
+    const sanitizedName = config.fileName.replace(/[^a-zA-Z0-9-_]/g, '_');
+    link.download = `${sanitizedName}.icns`;
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -455,7 +470,7 @@ export default function IconCreator() {
       // Draw subtitle if exists
       if (config.subtitle) {
         const subtitleSize = (size / config.size) * config.subtitleSize;
-        ctx.font = `${config.fontStyle} ${config.fontWeight} ${subtitleSize}px ${config.fontFamily}`;
+        ctx.font = `${config.subtitleFontStyle} ${config.subtitleFontWeight} ${subtitleSize}px ${config.subtitleFontFamily}`;
         ctx.fillStyle = config.subtitleColor;
         ctx.fillText(config.subtitle, size / 2, mainTextY + fontSize / 2 + subtitleSize / 2);
       }
@@ -476,16 +491,17 @@ export default function IconCreator() {
     }
 
     const zip = new JSZip();
+    const sanitizedName = config.fileName.replace(/[^a-zA-Z0-9-_]/g, '_');
 
     for (const size of sizes) {
       const blob = await generateIconAtSize(size);
-      zip.file(`icon${size}.png`, blob);
+      zip.file(`${sanitizedName}${size}.png`, blob);
     }
 
     const content = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(content);
     const link = document.createElement('a');
-    link.download = `icons-pack-${Date.now()}.zip`;
+    link.download = `${sanitizedName}-icons-pack.zip`;
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -610,8 +626,8 @@ export default function IconCreator() {
                   <label className="block text-sm mb-2 text-gray-700">{t.textSize}: {config.fontSize}px</label>
                   <input
                     type="range"
-                    min="100"
-                    max="400"
+                    min="10"
+                    max="200"
                     value={config.fontSize}
                     onChange={(e) => setConfig({ ...config, fontSize: parseInt(e.target.value) })}
                     className="w-full accent-purple-600"
@@ -644,12 +660,20 @@ export default function IconCreator() {
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">System Default</option>
+                    <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
+                    <option value="'IBM Plex Mono', monospace">IBM Plex Mono</option>
+                    <option value="'IBM Plex Serif', serif">IBM Plex Serif</option>
                     <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica Neue</option>
                     <option value="'Times New Roman', serif">Times New Roman</option>
                     <option value="'Courier New', monospace">Courier New</option>
                     <option value="Georgia, serif">Georgia</option>
                     <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
                     <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                    <option value="Impact, fantasy">Impact</option>
+                    <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
+                    <option value="'Palatino Linotype', 'Book Antiqua', Palatino, serif">Palatino</option>
                   </select>
                 </div>
 
@@ -699,8 +723,8 @@ export default function IconCreator() {
                       <label className="block text-sm mb-2 text-gray-700">{t.subtitleSize}: {config.subtitleSize}px</label>
                       <input
                         type="range"
-                        min="20"
-                        max="200"
+                        min="5"
+                        max="100"
                         value={config.subtitleSize}
                         onChange={(e) => setConfig({ ...config, subtitleSize: parseInt(e.target.value) })}
                         className="w-full accent-purple-600"
@@ -724,8 +748,73 @@ export default function IconCreator() {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700">{t.subtitleFontFamily}</label>
+                      <select
+                        value={config.subtitleFontFamily}
+                        onChange={(e) => setConfig({ ...config, subtitleFontFamily: e.target.value })}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">System Default</option>
+                        <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
+                        <option value="'IBM Plex Mono', monospace">IBM Plex Mono</option>
+                        <option value="'IBM Plex Serif', serif">IBM Plex Serif</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica Neue</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                        <option value="Impact, fantasy">Impact</option>
+                        <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
+                        <option value="'Palatino Linotype', 'Book Antiqua', Palatino, serif">Palatino</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm mb-2 text-gray-700">{t.subtitleFontWeight}</label>
+                        <select
+                          value={config.subtitleFontWeight}
+                          onChange={(e) => setConfig({ ...config, subtitleFontWeight: e.target.value })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="bold">Bold</option>
+                          <option value="lighter">Light</option>
+                          <option value="bolder">Bolder</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm mb-2 text-gray-700">{t.subtitleFontStyle}</label>
+                        <select
+                          value={config.subtitleFontStyle}
+                          onChange={(e) => setConfig({ ...config, subtitleFontStyle: e.target.value })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="italic">Italic</option>
+                          <option value="oblique">Oblique</option>
+                        </select>
+                      </div>
+                    </div>
                   </>
                 )}
+
+                <div>
+                  <label className="block text-sm mb-2 text-gray-700">{t.fileName}</label>
+                  <input
+                    type="text"
+                    value={config.fileName}
+                    onChange={(e) => setConfig({ ...config, fileName: e.target.value })}
+                    placeholder={lang === 'zh' ? '输入文件名' : 'Enter file name'}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
               </div>
             </div>
 
@@ -854,7 +943,7 @@ export default function IconCreator() {
             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">{t.size}</h3>
               <div className="grid grid-cols-4 gap-2">
-                {[256, 512, 1024, 2048].map(size => (
+                {[16, 32, 64, 128, 256, 512, 1024].map(size => (
                   <button
                     key={size}
                     onClick={() => setConfig({ ...config, size })}
@@ -864,6 +953,9 @@ export default function IconCreator() {
                     {size}px
                   </button>
                 ))}
+              </div>
+              <div className="mt-3 text-xs text-gray-500">
+                {lang === 'zh' ? 'macOS 标准尺寸：16px (菜单栏), 32px (Dock), 128px (应用图标), 256px (Launchpad), 512px (App Store), 1024px (高分辨率)' : 'macOS standard sizes: 16px (menu bar), 32px (Dock), 128px (app icon), 256px (Launchpad), 512px (App Store), 1024px (high resolution)'}
               </div>
             </div>
           </div>
