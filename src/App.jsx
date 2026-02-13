@@ -527,7 +527,7 @@ export default function IconCreator() {
               <Sparkles className="text-purple-600" />
               {t.title}
             </h1>
-            <p className="text-gray-600">{t.subtitle}</p>
+            
           </div>
           <div className="flex items-center gap-3">
             <a
