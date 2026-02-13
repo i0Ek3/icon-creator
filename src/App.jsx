@@ -16,6 +16,12 @@ export default function IconCreator() {
     text: 'A',
     textColor: '#ffffff',
     fontSize: 280,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontWeight: 'bold',
+    fontStyle: 'normal',
+    subtitle: '',
+    subtitleColor: '#ffffff',
+    subtitleSize: 80,
     shadowBlur: 20,
     shadowColor: 'rgba(0,0,0,0.3)',
   });
@@ -35,6 +41,12 @@ export default function IconCreator() {
       textSymbol: '文字/符号',
       textSize: '文字大小',
       textColor: '文字颜色',
+      fontFamily: '字体',
+      fontWeight: '字体粗细',
+      fontStyle: '字体样式',
+      subtitle: '副标题',
+      subtitleSize: '副标题大小',
+      subtitleColor: '副标题颜色',
       background: '背景',
       randomColors: '随机配色',
       bgType: '类型',
@@ -66,6 +78,12 @@ export default function IconCreator() {
       textSymbol: 'Text/Symbol',
       textSize: 'Text Size',
       textColor: 'Text Color',
+      fontFamily: 'Font Family',
+      fontWeight: 'Font Weight',
+      fontStyle: 'Font Style',
+      subtitle: 'Subtitle',
+      subtitleSize: 'Subtitle Size',
+      subtitleColor: 'Subtitle Color',
       background: 'Background',
       randomColors: 'Random Colors',
       bgType: 'Type',
@@ -193,12 +211,25 @@ export default function IconCreator() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = config.textColor;
-    ctx.font = `bold ${config.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.font = `${config.fontStyle} ${config.fontWeight} ${config.fontSize}px ${config.fontFamily}`;
 
     ctx.shadowBlur = config.shadowBlur;
     ctx.shadowColor = config.shadowColor;
 
-    ctx.fillText(config.text, size / 2, size / 2);
+    // Calculate text positions
+    let mainTextY = size / 2;
+    if (config.subtitle) {
+      mainTextY = size / 2 - config.fontSize / 4;
+    }
+
+    ctx.fillText(config.text, size / 2, mainTextY);
+
+    // Draw subtitle if exists
+    if (config.subtitle) {
+      ctx.font = `${config.fontStyle} ${config.fontWeight} ${config.subtitleSize}px ${config.fontFamily}`;
+      ctx.fillStyle = config.subtitleColor;
+      ctx.fillText(config.subtitle, size / 2, mainTextY + config.fontSize / 2 + config.subtitleSize / 2);
+    }
   };
 
   const downloadIcon = (format = 'png') => {
@@ -407,13 +438,27 @@ export default function IconCreator() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = config.textColor;
-      ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.font = `${config.fontStyle} ${config.fontWeight} ${fontSize}px ${config.fontFamily}`;
 
       const shadowBlur = (size / config.size) * config.shadowBlur;
       ctx.shadowBlur = shadowBlur;
       ctx.shadowColor = config.shadowColor;
 
-      ctx.fillText(config.text, size / 2, size / 2);
+      // Calculate text positions
+      let mainTextY = size / 2;
+      if (config.subtitle) {
+        mainTextY = size / 2 - fontSize / 4;
+      }
+
+      ctx.fillText(config.text, size / 2, mainTextY);
+
+      // Draw subtitle if exists
+      if (config.subtitle) {
+        const subtitleSize = (size / config.size) * config.subtitleSize;
+        ctx.font = `${config.fontStyle} ${config.fontWeight} ${subtitleSize}px ${config.fontFamily}`;
+        ctx.fillStyle = config.subtitleColor;
+        ctx.fillText(config.subtitle, size / 2, mainTextY + fontSize / 2 + subtitleSize / 2);
+      }
 
       tempCanvas.toBlob((blob) => {
         resolve(blob);
@@ -556,9 +601,8 @@ export default function IconCreator() {
                   <input
                     type="text"
                     value={config.text}
-                    onChange={(e) => setConfig({ ...config, text: e.target.value.slice(0, 3) })}
+                    onChange={(e) => setConfig({ ...config, text: e.target.value })}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-2xl text-center font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    maxLength={3}
                   />
                 </div>
 
@@ -591,6 +635,97 @@ export default function IconCreator() {
                     />
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm mb-2 text-gray-700">{t.fontFamily}</label>
+                  <select
+                    value={config.fontFamily}
+                    onChange={(e) => setConfig({ ...config, fontFamily: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">System Default</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm mb-2 text-gray-700">{t.fontWeight}</label>
+                    <select
+                      value={config.fontWeight}
+                      onChange={(e) => setConfig({ ...config, fontWeight: e.target.value })}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="bold">Bold</option>
+                      <option value="lighter">Light</option>
+                      <option value="bolder">Bolder</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm mb-2 text-gray-700">{t.fontStyle}</label>
+                    <select
+                      value={config.fontStyle}
+                      onChange={(e) => setConfig({ ...config, fontStyle: e.target.value })}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="italic">Italic</option>
+                      <option value="oblique">Oblique</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm mb-2 text-gray-700">{t.subtitle}</label>
+                  <input
+                    type="text"
+                    value={config.subtitle}
+                    onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
+                    placeholder={lang === 'zh' ? '输入副标题文字' : 'Enter subtitle text'}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                {config.subtitle && (
+                  <>
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700">{t.subtitleSize}: {config.subtitleSize}px</label>
+                      <input
+                        type="range"
+                        min="20"
+                        max="200"
+                        value={config.subtitleSize}
+                        onChange={(e) => setConfig({ ...config, subtitleSize: parseInt(e.target.value) })}
+                        className="w-full accent-purple-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm mb-2 text-gray-700">{t.subtitleColor}</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={config.subtitleColor}
+                          onChange={(e) => setConfig({ ...config, subtitleColor: e.target.value })}
+                          className="w-16 h-12 rounded cursor-pointer border border-gray-200"
+                        />
+                        <input
+                          type="text"
+                          value={config.subtitleColor}
+                          onChange={(e) => setConfig({ ...config, subtitleColor: e.target.value })}
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
