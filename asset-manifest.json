@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/icon-creator/static/css/main.3bcdbcad.css",
-    "main.js": "/icon-creator/static/js/main.af7f4afa.js",
+    "main.js": "/icon-creator/static/js/main.5f4fdb3b.js",
     "index.html": "/icon-creator/index.html",
     "main.3bcdbcad.css.map": "/icon-creator/static/css/main.3bcdbcad.css.map",
-    "main.af7f4afa.js.map": "/icon-creator/static/js/main.af7f4afa.js.map"
+    "main.5f4fdb3b.js.map": "/icon-creator/static/js/main.5f4fdb3b.js.map"
   },
   "entrypoints": [
     "static/css/main.3bcdbcad.css",
-    "static/js/main.af7f4afa.js"
+    "static/js/main.5f4fdb3b.js"
   ]
 }
